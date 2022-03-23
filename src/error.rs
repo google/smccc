@@ -38,18 +38,10 @@ pub(crate) fn success_or_error_64(value: u64) -> Result<(), Error> {
 }
 
 fn success_or_error(value: i32) -> Result<(), Error> {
-    match value {
-        SUCCESS => Ok(()),
-        NOT_SUPPORTED => Err(Error::NotSupported),
-        INVALID_PARAMETERS => Err(Error::InvalidParameters),
-        DENIED => Err(Error::Denied),
-        ALREADY_ON => Err(Error::AlreadyOn),
-        ON_PENDING => Err(Error::OnPending),
-        INTERNAL_FAILURE => Err(Error::InternalFailure),
-        NOT_PRESENT => Err(Error::NotPresent),
-        DISABLED => Err(Error::Disabled),
-        INVALID_ADDRESS => Err(Error::InvalidAddress),
-        _ => Err(Error::Unknown(value)),
+    if value == SUCCESS {
+        Ok(())
+    } else {
+        Err(value.into())
     }
 }
 
@@ -66,6 +58,23 @@ impl From<Error> for i32 {
             Error::Disabled => DISABLED,
             Error::InvalidAddress => INVALID_ADDRESS,
             Error::Unknown(value) => value,
+        }
+    }
+}
+
+impl From<i32> for Error {
+    fn from(value: i32) -> Self {
+        match value {
+            NOT_SUPPORTED => Error::NotSupported,
+            INVALID_PARAMETERS => Error::InvalidParameters,
+            DENIED => Error::Denied,
+            ALREADY_ON => Error::AlreadyOn,
+            ON_PENDING => Error::OnPending,
+            INTERNAL_FAILURE => Error::InternalFailure,
+            NOT_PRESENT => Error::NotPresent,
+            DISABLED => Error::Disabled,
+            INVALID_ADDRESS => Error::InvalidAddress,
+            _ => Error::Unknown(value),
         }
     }
 }

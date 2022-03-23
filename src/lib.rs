@@ -12,7 +12,11 @@ pub mod error;
 mod smccc;
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
-pub use calls::{cpu_off, cpu_suspend, system_off, system_reset, system_reset2, version};
+pub use calls::{
+    affinity_info, cpu_off, cpu_on, cpu_suspend, migrate, migrate_info_type, migrate_info_up_cpu,
+    system_off, system_reset, system_reset2, version,
+};
+use error::Error;
 
 pub const PSCI_VERSION: u32 = 0x84000000;
 pub const PSCI_CPU_SUSPEND_32: u32 = 0x84000001;
@@ -47,3 +51,57 @@ pub const PSCI_STAT_RESIDENCY_32: u32 = 0x84000010;
 pub const PSCI_STAT_RESIDENCY_64: u32 = 0xC4000010;
 pub const PSCI_STAT_COUNT_32: u32 = 0x84000011;
 pub const PSCI_STAT_COUNT_64: u32 = 0xC4000011;
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum LowestAffinityLevel {
+    All = 0,
+    Aff0Ignored = 1,
+    Aff0Aff1Ignored = 2,
+    Aff0Aff1Aff2Ignored = 3,
+}
+
+impl From<LowestAffinityLevel> for u64 {
+    fn from(lowest_affinity_level: LowestAffinityLevel) -> u64 {
+        (lowest_affinity_level as u32).into()
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum AffinityState {
+    On = 0,
+    Off = 1,
+    OnPending = 2,
+}
+
+impl TryFrom<i32> for AffinityState {
+    type Error = Error;
+
+    fn try_from(value: i32) -> Result<Self, Error> {
+        match value {
+            0 => Ok(Self::On),
+            1 => Ok(Self::Off),
+            2 => Ok(Self::OnPending),
+            _ => Err(value.into()),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum MigrateType {
+    MigrateCapable = 0,
+    NotMigrateCapable = 1,
+    MigrationNotRequired = 2,
+}
+
+impl TryFrom<i32> for MigrateType {
+    type Error = Error;
+
+    fn try_from(value: i32) -> Result<Self, Error> {
+        match value {
+            0 => Ok(Self::MigrateCapable),
+            1 => Ok(Self::NotMigrateCapable),
+            2 => Ok(Self::MigrationNotRequired),
+            _ => Err(value.into()),
+        }
+    }
+}
