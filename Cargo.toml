@@ -7,4 +7,9 @@ authors = ["Andrew Walbran <qwandor@google.com>"]
 keywords = ["arm", "aarch64", "cortex-a", "psci"]
 categories = ["embedded", "no-std", "hardware-support"]
 
+[features]
+default = ["hvc"]
+hvc = []
+smc = []
+
 [dependencies]
