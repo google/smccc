@@ -13,8 +13,10 @@ mod smccc;
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
 pub use calls::{
-    affinity_info, cpu_off, cpu_on, cpu_suspend, migrate, migrate_info_type, migrate_info_up_cpu,
-    system_off, system_reset, system_reset2, version,
+    affinity_info, cpu_default_suspend, cpu_freeze, cpu_off, cpu_on, cpu_suspend, mem_protect,
+    mem_protect_check_range, migrate, migrate_info_type, migrate_info_up_cpu, node_hw_state,
+    psci_features, set_suspend_mode, stat_count, stat_residency, system_off, system_reset,
+    system_reset2, system_suspend, version,
 };
 use error::Error;
 
@@ -103,5 +105,37 @@ impl TryFrom<i32> for MigrateType {
             2 => Ok(Self::MigrationNotRequired),
             _ => Err(value.into()),
         }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum PowerState {
+    HwOn = 0,
+    HwOff = 1,
+    HwStandby = 2,
+}
+
+impl TryFrom<i32> for PowerState {
+    type Error = Error;
+
+    fn try_from(value: i32) -> Result<Self, Error> {
+        match value {
+            0 => Ok(Self::HwOn),
+            1 => Ok(Self::HwOff),
+            2 => Ok(Self::HwStandby),
+            _ => Err(value.into()),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum SuspendMode {
+    PlatformCoordinated = 0,
+    OsInitiated = 1,
+}
+
+impl From<SuspendMode> for u32 {
+    fn from(suspend_mode: SuspendMode) -> u32 {
+        suspend_mode as u32
     }
 }

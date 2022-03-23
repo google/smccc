@@ -7,10 +7,13 @@
 use crate::error::{success_or_error_32, success_or_error_64, Error};
 use crate::smccc::{call32, call64};
 use crate::{
-    AffinityState, LowestAffinityLevel, MigrateType, PSCI_AFFINITY_INFO_64, PSCI_CPU_OFF,
-    PSCI_CPU_ON_64, PSCI_CPU_SUSPEND_64, PSCI_MIGRATE_64, PSCI_MIGRATE_INFO_TYPE,
-    PSCI_MIGRATE_INFO_UP_CPU_64, PSCI_SYSTEM_OFF, PSCI_SYSTEM_RESET, PSCI_SYSTEM_RESET2_64,
-    PSCI_VERSION,
+    AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
+    PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
+    PSCI_CPU_ON_64, PSCI_CPU_SUSPEND_64, PSCI_FEATURES, PSCI_MEM_PROTECT,
+    PSCI_MEM_PROTECT_CHECK_RANGE_64, PSCI_MIGRATE_64, PSCI_MIGRATE_INFO_TYPE,
+    PSCI_MIGRATE_INFO_UP_CPU_64, PSCI_NODE_HW_STATE_64, PSCI_SET_SUSPEND_MODE, PSCI_STAT_COUNT_64,
+    PSCI_STAT_RESIDENCY_64, PSCI_SYSTEM_OFF, PSCI_SYSTEM_RESET, PSCI_SYSTEM_RESET2_64,
+    PSCI_SYSTEM_SUSPEND_64, PSCI_VERSION,
 };
 
 /// Returns the version of PSCI implemented.
@@ -172,4 +175,179 @@ pub fn system_reset2(reset_type: u32, cookie: u64) -> Result<(), Error> {
             ],
         )[0],
     )
+}
+
+/// Enables or disables memory protection.
+pub fn mem_protect(enable: bool) -> Result<bool, Error> {
+    match call32(PSCI_MEM_PROTECT, [enable as u32, 0, 0, 0, 0, 0, 0])[0] as i32 {
+        0 => Ok(false),
+        1 => Ok(true),
+        error => Err(error.into()),
+    }
+}
+
+/// Checks whether a memory range is protected by `MEM_PROTECT`.
+pub fn mem_protect_check_range(base: u64, length: u64) -> Result<(), Error> {
+    success_or_error_64(
+        call64(
+            PSCI_MEM_PROTECT_CHECK_RANGE_64,
+            [base, length, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        )[0],
+    )
+}
+
+/// Queries whether `SMCCC_VERSION` or a specific PSCI function is implemented, and what features
+/// are supported.
+pub fn psci_features(psci_function_id: u32) -> Result<u32, Error> {
+    let result = call32(PSCI_FEATURES, [psci_function_id, 0, 0, 0, 0, 0, 0])[0] as i32;
+    if result >= 0 {
+        Ok(result as u32)
+    } else {
+        Err(result.into())
+    }
+}
+
+/// Puts the current core into an implementation-defined low power state.
+pub fn cpu_freeze() -> Result<(), Error> {
+    success_or_error_32(call32(PSCI_CPU_FREEZE, [0, 0, 0, 0, 0, 0, 0])[0])
+}
+
+/// Puts the current core into an implementation-defined low power state.
+pub fn cpu_default_suspend(entry_point_address: u64, context_id: u64) -> Result<(), Error> {
+    success_or_error_64(
+        call64(
+            PSCI_CPU_DEFAULT_SUSPEND_64,
+            [
+                entry_point_address,
+                context_id,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ],
+        )[0],
+    )
+}
+
+/// Retuns the true hardware state of a node in the power domain topology.
+pub fn node_hw_state(target_cpu: u64, power_level: u32) -> Result<PowerState, Error> {
+    (call64(
+        PSCI_NODE_HW_STATE_64,
+        [
+            target_cpu,
+            power_level.into(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ],
+    )[0] as i32)
+        .try_into()
+}
+
+/// Suspends the system to RAM.
+pub fn system_suspend(entry_point_address: u64, context_id: u64) -> Result<(), Error> {
+    success_or_error_64(
+        call64(
+            PSCI_SYSTEM_SUSPEND_64,
+            [
+                entry_point_address,
+                context_id,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ],
+        )[0],
+    )
+}
+
+/// Sets the mode used by `CPU_SUSPEND`.
+pub fn set_suspend_mode(mode: SuspendMode) -> Result<(), Error> {
+    success_or_error_32(call32(PSCI_SET_SUSPEND_MODE, [mode.into(), 0, 0, 0, 0, 0, 0])[0])
+}
+
+/// Returns the amount of time the platform has spend in the given power state since cold boot.
+pub fn stat_residency(target_cpu: u64, power_state: u32) -> u64 {
+    call64(
+        PSCI_STAT_RESIDENCY_64,
+        [
+            target_cpu,
+            power_state.into(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ],
+    )[0]
+}
+
+/// Returns the number of times the platform has used the given power state since cold boot.
+pub fn stat_count(target_cpu: u64, power_state: u32) -> u64 {
+    call64(
+        PSCI_STAT_COUNT_64,
+        [
+            target_cpu,
+            power_state.into(),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+        ],
+    )[0]
 }
