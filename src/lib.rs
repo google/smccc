@@ -6,12 +6,13 @@
 
 #![no_std]
 
-mod error;
+#[cfg(any(feature = "hvc", feature = "smc"))]
+mod calls;
+pub mod error;
 mod smccc;
 
-use error::{success_or_error_32, success_or_error_64, Error};
 #[cfg(any(feature = "hvc", feature = "smc"))]
-use smccc::{call32, call64};
+pub use calls::{cpu_off, cpu_suspend, system_off, system_reset, system_reset2, version};
 
 pub const PSCI_VERSION: u32 = 0x84000000;
 pub const PSCI_CPU_SUSPEND_32: u32 = 0x84000001;
@@ -46,89 +47,3 @@ pub const PSCI_STAT_RESIDENCY_32: u32 = 0x84000010;
 pub const PSCI_STAT_RESIDENCY_64: u32 = 0xC4000010;
 pub const PSCI_STAT_COUNT_32: u32 = 0x84000011;
 pub const PSCI_STAT_COUNT_64: u32 = 0xC4000011;
-
-/// Returns the version of PSCI implemented.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn version() -> u32 {
-    call32(PSCI_VERSION, [0, 0, 0, 0, 0, 0, 0])[0]
-}
-
-/// Suspends execution of a core or topology node.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn cpu_suspend(
-    power_state: u32,
-    entry_point_address: u64,
-    context_id: u64,
-) -> Result<(), Error> {
-    success_or_error_64(
-        call64(
-            PSCI_CPU_SUSPEND_64,
-            [
-                power_state.into(),
-                entry_point_address,
-                context_id,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ],
-        )[0],
-    )
-}
-
-/// Powers down the current core.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn cpu_off() -> Result<(), Error> {
-    success_or_error_32(call32(PSCI_CPU_OFF, [0, 0, 0, 0, 0, 0, 0])[0])
-}
-
-/// Shuts down the system.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn system_off() -> Result<(), Error> {
-    success_or_error_32(call32(PSCI_SYSTEM_OFF, [0, 0, 0, 0, 0, 0, 0])[0])
-}
-
-/// Resets the system.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn system_reset() -> Result<(), Error> {
-    success_or_error_32(call32(PSCI_SYSTEM_RESET, [0, 0, 0, 0, 0, 0, 0])[0])
-}
-
-/// Resets the system in an architectural or vendor-specific way.
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub fn system_reset2(reset_type: u32, cookie: u64) -> Result<(), Error> {
-    success_or_error_64(
-        call64(
-            PSCI_SYSTEM_RESET2_64,
-            [
-                reset_type.into(),
-                cookie,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-            ],
-        )[0],
-    )
-}
