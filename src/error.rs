@@ -15,6 +15,7 @@ pub const NOT_PRESENT: i32 = -7;
 pub const DISABLED: i32 = -8;
 pub const INVALID_ADDRESS: i32 = -9;
 
+/// Standard PSCI errors.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Error {
     NotSupported,
@@ -26,6 +27,7 @@ pub enum Error {
     NotPresent,
     Disabled,
     InvalidAddress,
+    /// An unexpected return value from a PSCI function.
     Unknown(i32),
 }
 

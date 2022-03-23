@@ -2,7 +2,15 @@
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! PSCI calls.
+//! Constants for the Arm Power State Coordination Interface (PSCI), and functions to call them.
+//!
+//! Note that PSCI calls may be made via either HVC or SMC. You can choose which one to use by
+//! building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default `hvc` is
+//! enabled. If neither feature is enabled then the functions to make calls will not be available,
+//! but the constants are still provided.
+//!
+//! This crate currently only supports aarch64 and the SMC64 versions of the various calls, in the
+//! cases that both SMC32 and SMC64 versions exist.
 
 #![no_std]
 
@@ -54,11 +62,17 @@ pub const PSCI_STAT_RESIDENCY_64: u32 = 0xC4000010;
 pub const PSCI_STAT_COUNT_32: u32 = 0x84000011;
 pub const PSCI_STAT_COUNT_64: u32 = 0xC4000011;
 
+/// Selects which affinity level fields are valid in the `target_affinity` parameter to
+/// `AFFINITY_INFO`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum LowestAffinityLevel {
+    /// All afinity level fields are valid.
     All = 0,
+    /// The `Aff0` field is ignored.
     Aff0Ignored = 1,
+    /// The `Aff0` and `Aff1` fields are ignored.
     Aff0Aff1Ignored = 2,
+    /// The `Aff0`, `Aff1` and `Aff2` fields are ignored.
     Aff0Aff1Aff2Ignored = 3,
 }
 
@@ -68,10 +82,14 @@ impl From<LowestAffinityLevel> for u64 {
     }
 }
 
+/// Affinity state values returned by `AFFINITY_INFO`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum AffinityState {
+    /// At least one core in the affinity instance is on.
     On = 0,
+    /// All cores in the affinity instance are off.
     Off = 1,
+    /// The affinity instance is transitioning to the on state.
     OnPending = 2,
 }
 
@@ -88,10 +106,14 @@ impl TryFrom<i32> for AffinityState {
     }
 }
 
+/// The level of multicore support in the Trusted OS, as returned by `MIGRATE_INFO_TYPE`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum MigrateType {
+    /// The Trusted OS will only run on one core, and supports the `MIGRATE` function.
     MigrateCapable = 0,
+    /// The Trusted OS does not support the `MIGRATE` function.
     NotMigrateCapable = 1,
+    /// Either there is no Trusted OS, or it doesn't require migration.
     MigrationNotRequired = 2,
 }
 
@@ -108,10 +130,14 @@ impl TryFrom<i32> for MigrateType {
     }
 }
 
+/// The power state of a node in the power domain topology, as returned by `NODE_HW_STATE`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum PowerState {
+    /// The node is in the run state.
     HwOn = 0,
+    /// The node is fully powered down.
     HwOff = 1,
+    /// The node is in a standby or retention power state.
     HwStandby = 2,
 }
 
@@ -128,9 +154,12 @@ impl TryFrom<i32> for PowerState {
     }
 }
 
+/// The mode to be used by `CPU_SUSPEND`, as set by `PSCI_SET_SUSPEND_MODE`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum SuspendMode {
+    /// Platform-coordinated mode.
     PlatformCoordinated = 0,
+    /// OS-initiated mode.
     OsInitiated = 1,
 }
 
