@@ -34,10 +34,10 @@ pub fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
 #[cfg(feature = "hvc")]
 #[inline(always)]
 fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
-    let mut ret = [0; 8];
-
     #[cfg(target_arch = "aarch64")]
     unsafe {
+        let mut ret = [0; 8];
+
         core::arch::asm!(
             "hvc #0",
             inout("w0") function => ret[0],
@@ -49,23 +49,23 @@ fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w6") args[5] => ret[6],
             inout("w7") args[6] => ret[7],
             options(nomem, nostack)
-        )
+        );
+
+        ret
     }
 
     #[cfg(not(target_arch = "aarch64"))]
     unimplemented!();
-
-    ret
 }
 
 /// Make an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
 #[cfg(feature = "smc")]
 #[inline(always)]
 fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
-    let mut ret = [0; 8];
-
     #[cfg(target_arch = "aarch64")]
     unsafe {
+        let mut ret = [0; 8];
+
         core::arch::asm!(
             "smc #0",
             inout("w0") function => ret[0],
@@ -77,23 +77,23 @@ fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w6") args[5] => ret[6],
             inout("w7") args[6] => ret[7],
             options(nomem, nostack)
-        )
+        );
+
+        ret
     }
 
     #[cfg(not(target_arch = "aarch64"))]
     unimplemented!();
-
-    ret
 }
 
 /// Make an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
 #[cfg(feature = "hvc")]
 #[inline(always)]
 pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
-    let mut ret = [0; 18];
-
     #[cfg(target_arch = "aarch64")]
     unsafe {
+        let mut ret = [0; 18];
+
         core::arch::asm!(
             "hvc #0",
             inout("x0") function as u64 => ret[0],
@@ -115,23 +115,23 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
             inout("x16") args[15] => ret[16],
             inout("x17") args[16] => ret[17],
             options(nomem, nostack)
-        )
+        );
+
+        ret
     }
 
     #[cfg(not(target_arch = "aarch64"))]
     unimplemented!();
-
-    ret
 }
 
 /// Make an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
 #[cfg(feature = "smc")]
 #[inline(always)]
 pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
-    let mut ret = [0; 18];
-
     #[cfg(target_arch = "aarch64")]
     unsafe {
+        let mut ret = [0; 18];
+
         core::arch::asm!(
             "smc #0",
             inout("x0") function as u64 => ret[0],
@@ -153,11 +153,11 @@ pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
             inout("x16") args[15] => ret[16],
             inout("x17") args[16] => ret[17],
             options(nomem, nostack)
-        )
+        );
+
+        ret
     }
 
     #[cfg(not(target_arch = "aarch64"))]
     unimplemented!();
-
-    ret
 }
