@@ -3,8 +3,8 @@
 [![crates.io page](https://img.shields.io/crates/v/psci.svg)](https://crates.io/crates/psci)
 [![docs.rs page](https://docs.rs/psci/badge.svg)](https://docs.rs/psci)
 
-This crate provides constants for the Arm Power State Coordination Interface (PSCI), and functions
-to call them.
+This crate provides constants for version 1.1 of the Arm Power State Coordination Interface (PSCI),
+and functions to call them.
 
 Note that PSCI calls may be made via either HVC or SMC. You can choose which one to use by building
 this crate with the corresponding feature (i.e. `hvc` or `smc`). By default `hvc` is enabled. If

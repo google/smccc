@@ -2,7 +2,8 @@
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! Constants for the Arm Power State Coordination Interface (PSCI), and functions to call them.
+//! Constants for version 1.1 of the Arm Power State Coordination Interface (PSCI) version 1.1, and
+//! functions to call them.
 //!
 //! Note that PSCI calls may be made via either HVC or SMC. You can choose which one to use by
 //! building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default `hvc` is
