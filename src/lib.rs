@@ -21,7 +21,7 @@ compile_error!("Only one of `hvc` or `smc` features may be enabled.");
 #[cfg(any(feature = "hvc", feature = "smc"))]
 mod calls;
 pub mod error;
-mod smccc;
+pub mod smccc;
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
 pub use calls::{

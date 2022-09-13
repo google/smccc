@@ -2,11 +2,11 @@
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! SMCCC calls.
+//! Functions for making SMCCC calls.
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
 #[inline(always)]
-pub fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
+pub(crate) fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
     #[cfg(feature = "hvc")]
     {
         hvc32(function, args)
@@ -19,7 +19,7 @@ pub fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
 #[inline(always)]
-pub fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+pub(crate) fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
     #[cfg(feature = "hvc")]
     {
         hvc64(function, args)
@@ -30,10 +30,9 @@ pub fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
     }
 }
 
-/// Make an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
-#[cfg(feature = "hvc")]
+/// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
 #[inline(always)]
-fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 8];
@@ -58,10 +57,9 @@ fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     unimplemented!();
 }
 
-/// Make an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
-#[cfg(feature = "smc")]
+/// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
 #[inline(always)]
-fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 8];
@@ -86,8 +84,7 @@ fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     unimplemented!();
 }
 
-/// Make an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
-#[cfg(feature = "hvc")]
+/// Makes an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
 #[inline(always)]
 pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
     #[cfg(target_arch = "aarch64")]
@@ -124,8 +121,7 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
     unimplemented!();
 }
 
-/// Make an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
-#[cfg(feature = "smc")]
+/// Makes an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
 #[inline(always)]
 pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
     #[cfg(target_arch = "aarch64")]
