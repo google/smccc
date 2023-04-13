@@ -5,6 +5,7 @@
 //! Error codes for standard Arm Architecture SMCCC calls.
 
 pub use crate::smccc::error::SUCCESS;
+use core::fmt::{self, Display, Formatter};
 
 pub const NOT_SUPPORTED: i32 = -1;
 pub const NOT_REQUIRED: i32 = -2;
@@ -41,6 +42,17 @@ impl From<i32> for Error {
             NOT_REQUIRED => Error::NotRequired,
             INVALID_PARAMETER => Error::InvalidParameter,
             _ => Error::Unknown(value),
+        }
+    }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::NotSupported => write!(f, "SMCCC call not supported"),
+            Self::NotRequired => write!(f, "SMCCC call not required"),
+            Self::InvalidParameter => write!(f, "SMCCC call received non-supported value"),
+            Self::Unknown(e) => write!(f, "Unknown SMCCC return value {} ({0:#x})", e),
         }
     }
 }
