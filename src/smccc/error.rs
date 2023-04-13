@@ -21,3 +21,12 @@ fn success_or_error<E: From<i32>>(value: i32) -> Result<(), E> {
         Err(value.into())
     }
 }
+
+pub fn positive_or_error_32<E: From<i32>>(value: u32) -> Result<u32, E> {
+    let signed = value as i32;
+    if signed < 0 {
+        Err(signed.into())
+    } else {
+        Ok(value)
+    }
+}
