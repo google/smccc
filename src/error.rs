@@ -4,7 +4,8 @@
 
 //! PSCI error codes.
 
-pub const SUCCESS: i32 = 0;
+pub use crate::smccc::error::SUCCESS;
+
 pub const NOT_SUPPORTED: i32 = -1;
 pub const INVALID_PARAMETERS: i32 = -2;
 pub const DENIED: i32 = -3;
@@ -29,22 +30,6 @@ pub enum Error {
     InvalidAddress,
     /// An unexpected return value from a PSCI function.
     Unknown(i32),
-}
-
-pub(crate) fn success_or_error_32(value: u32) -> Result<(), Error> {
-    success_or_error(value as i32)
-}
-
-pub(crate) fn success_or_error_64(value: u64) -> Result<(), Error> {
-    success_or_error(value as i32)
-}
-
-fn success_or_error(value: i32) -> Result<(), Error> {
-    if value == SUCCESS {
-        Ok(())
-    } else {
-        Err(value.into())
-    }
 }
 
 impl From<Error> for i32 {
