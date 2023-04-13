@@ -2,13 +2,13 @@
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! Constants for version 1.1 of the Arm Power State Coordination Interface (PSCI) version 1.1, and
-//! functions to call them.
+//! Constants for version 1.4 of the Arm SMC Calling Convention and version 1.1 of the Arm Power
+//! State Coordination Interface (PSCI) version 1.1, and functions to call them.
 //!
-//! Note that PSCI calls may be made via either HVC or SMC. You can choose which one to use by
-//! building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default `hvc` is
-//! enabled. If neither feature is enabled then the functions to make calls will not be available,
-//! but the constants are still provided.
+//! Note that PSCI and other SMCCC calls may be made via either HVC or SMC. You can choose which one
+//! to use by building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default
+//! `hvc` is enabled. If neither feature is enabled then the functions to make calls will not be
+//! available, but the constants and types are still provided.
 //!
 //! This crate currently only supports aarch64 and the SMC64 versions of the various calls, in the
 //! cases that both SMC32 and SMC64 versions exist.
