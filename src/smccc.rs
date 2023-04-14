@@ -4,6 +4,9 @@
 
 //! Functions for making SMCCC calls.
 
+pub mod arch;
+pub(crate) mod error;
+
 #[cfg(any(feature = "hvc", feature = "smc"))]
 #[inline(always)]
 pub(crate) fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {

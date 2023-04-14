@@ -4,9 +4,12 @@
 
 //! Functions to make PSCI calls.
 
-use crate::error::{success_or_error_32, success_or_error_64, Error};
-use crate::smccc::{call32, call64};
 use crate::{
+    error::Error,
+    smccc::{
+        call32, call64,
+        error::{success_or_error_32, success_or_error_64},
+    },
     AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
     PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
     PSCI_CPU_ON_64, PSCI_CPU_SUSPEND_64, PSCI_FEATURES, PSCI_MEM_PROTECT,
