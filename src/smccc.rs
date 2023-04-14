@@ -5,7 +5,7 @@
 //! Functions for making SMCCC calls.
 
 pub mod arch;
-pub(crate) mod error;
+pub mod error;
 
 #[cfg(any(feature = "hvc", feature = "smc"))]
 #[inline(always)]

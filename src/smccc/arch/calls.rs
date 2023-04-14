@@ -13,7 +13,7 @@ use crate::smccc::{
 
 /// Returns the implemented version of the SMC Calling Convention.
 pub fn version() -> Result<Version, Error> {
-    (call32(SMCCC_VERSION, [0, 0, 0, 0, 0, 0, 0])[0] as i32).try_into()
+    (call32(SMCCC_VERSION, [0; 7])[0] as i32).try_into()
 }
 
 /// Returns whether the given Arm Architecture Service function is implemented, and any feature
@@ -29,7 +29,7 @@ pub fn soc_id(soc_id_type: SocIdType) -> Result<u32, Error> {
 
 /// Executes a firmware workaround to mitigate CVE-2017-5715.
 pub fn arch_workaround_1() -> Result<(), Error> {
-    success_or_error_32(call32(SMCCC_ARCH_WORKAROUND_1, [0, 0, 0, 0, 0, 0, 0])[0])
+    success_or_error_32(call32(SMCCC_ARCH_WORKAROUND_1, [0; 7])[0])
 }
 
 /// Enables or disables the mitigation for CVE-2018-3639.
@@ -39,5 +39,5 @@ pub fn arch_workaround_2(enable: bool) -> Result<(), Error> {
 
 /// Executes a firmware workaround to mitigate CVE-2017-5715 and CVE-2022-23960.
 pub fn arch_workaround_3() -> Result<(), Error> {
-    success_or_error_32(call32(SMCCC_ARCH_WORKAROUND_3, [0, 0, 0, 0, 0, 0, 0])[0])
+    success_or_error_32(call32(SMCCC_ARCH_WORKAROUND_3, [0; 7])[0])
 }
