@@ -59,6 +59,12 @@ impl From<Error> for i32 {
     }
 }
 
+impl From<Error> for i64 {
+    fn from(error: Error) -> i64 {
+        i32::from(error).into()
+    }
+}
+
 impl From<i32> for Error {
     fn from(value: i32) -> Self {
         match value {
@@ -73,6 +79,12 @@ impl From<i32> for Error {
             INVALID_ADDRESS => Error::InvalidAddress,
             _ => Error::Unknown(value),
         }
+    }
+}
+
+impl From<i64> for Error {
+    fn from(value: i64) -> Self {
+        Self::from(value as i32)
     }
 }
 

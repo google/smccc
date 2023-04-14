@@ -27,17 +27,19 @@ pub const SUCCESS: i32 = 0;
 /// Converts the given value (returned from an HVC32 or SMC32 call) either to `Ok(())` if it is
 /// equal to [`SUCCESS`], or else an error of the given type.
 pub fn success_or_error_32<E: From<i32>>(value: u32) -> Result<(), E> {
-    success_or_error(value as i32)
+    let value = value as i32;
+    if value == SUCCESS {
+        Ok(())
+    } else {
+        Err(value.into())
+    }
 }
 
 /// Converts the given value (returned from an HVC64 or SMC64 call) either to `Ok(())` if it is
 /// equal to [`SUCCESS`], or else an error of the given type.
-pub fn success_or_error_64<E: From<i32>>(value: u64) -> Result<(), E> {
-    success_or_error(value as i32)
-}
-
-fn success_or_error<E: From<i32>>(value: i32) -> Result<(), E> {
-    if value == SUCCESS {
+pub fn success_or_error_64<E: From<i64>>(value: u64) -> Result<(), E> {
+    let value = value as i64;
+    if value == SUCCESS.into() {
         Ok(())
     } else {
         Err(value.into())

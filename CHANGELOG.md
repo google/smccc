@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.1.2
+## 0.1.3
+
+### Bugfixes
+
+- Fixed type of `smccc::error::success_or_error_64`. This is a breaking change relative to 0.1.2 but
+  it was yanked.
+
+## 0.1.2 (yanked)
 
 ### New features
 
