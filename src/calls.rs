@@ -8,7 +8,7 @@ use crate::{
     error::Error,
     smccc::{
         call32, call64,
-        error::{success_or_error_32, success_or_error_64},
+        error::{positive_or_error_32, success_or_error_32, success_or_error_64},
     },
     AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
     PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
@@ -199,12 +199,7 @@ pub fn mem_protect_check_range(base: u64, length: u64) -> Result<(), Error> {
 /// Queries whether `SMCCC_VERSION` or a specific PSCI function is implemented, and what features
 /// are supported.
 pub fn psci_features(psci_function_id: u32) -> Result<u32, Error> {
-    let result = call32(PSCI_FEATURES, [psci_function_id, 0, 0, 0, 0, 0, 0])[0] as i32;
-    if result >= 0 {
-        Ok(result as u32)
-    } else {
-        Err(result.into())
-    }
+    positive_or_error_32(call32(PSCI_FEATURES, [psci_function_id, 0, 0, 0, 0, 0, 0])[0])
 }
 
 /// Puts the current core into an implementation-defined low power state.
