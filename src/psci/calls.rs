@@ -4,19 +4,18 @@
 
 //! Functions to make PSCI calls.
 
-use crate::{
-    error::Error,
-    smccc::{
-        call32, call64,
-        error::{positive_or_error_32, success_or_error_32, success_or_error_64},
-    },
-    AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
+use super::{
+    error::Error, AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
     PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
     PSCI_CPU_ON_64, PSCI_CPU_SUSPEND_64, PSCI_FEATURES, PSCI_MEM_PROTECT,
     PSCI_MEM_PROTECT_CHECK_RANGE_64, PSCI_MIGRATE_64, PSCI_MIGRATE_INFO_TYPE,
     PSCI_MIGRATE_INFO_UP_CPU_64, PSCI_NODE_HW_STATE_64, PSCI_SET_SUSPEND_MODE, PSCI_STAT_COUNT_64,
     PSCI_STAT_RESIDENCY_64, PSCI_SYSTEM_OFF, PSCI_SYSTEM_RESET, PSCI_SYSTEM_RESET2_64,
     PSCI_SYSTEM_SUSPEND_64, PSCI_VERSION,
+};
+use crate::{
+    call32, call64,
+    error::{positive_or_error_32, success_or_error_32, success_or_error_64},
 };
 
 /// Returns the version of PSCI implemented.

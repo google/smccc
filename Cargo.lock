@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "psci"
-version = "0.1.3"
+name = "smccc"
+version = "0.1.0"

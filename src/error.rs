@@ -1,106 +1,76 @@
-// Copyright 2022 the authors.
+// Copyright 2023 the authors.
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! PSCI error codes.
+//! Utility functions for error handling.
+//!
+//! These functions can be combined with the appropriate HVC or SMC functions to wrap calls which
+//! return a single value where negative values indicate an error.
+//!
+//! For example, the [`system_off`](crate::psci::system_off) function is implemented approximately
+//! as:
+//!
+//! ```
+//! use smccc::{
+//!     error::success_or_error_32,
+//!     psci::{error::Error, PSCI_SYSTEM_OFF},
+//!     smc32,
+//! };
+//!
+//! pub fn system_off() -> Result<(), Error> {
+//!     success_or_error_32(smc32(PSCI_SYSTEM_OFF, [0; 7])[0])
+//! }
+//! ```
 
-pub use crate::smccc::error::SUCCESS;
-use core::fmt::{self, Display, Formatter};
+/// A value commonly returned to indicate a successful SMCCC call.
+pub const SUCCESS: i32 = 0;
 
-pub const NOT_SUPPORTED: i32 = -1;
-pub const INVALID_PARAMETERS: i32 = -2;
-pub const DENIED: i32 = -3;
-pub const ALREADY_ON: i32 = -4;
-pub const ON_PENDING: i32 = -5;
-pub const INTERNAL_FAILURE: i32 = -6;
-pub const NOT_PRESENT: i32 = -7;
-pub const DISABLED: i32 = -8;
-pub const INVALID_ADDRESS: i32 = -9;
-
-/// Standard PSCI errors.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Error {
-    /// PSCI call not supported.
-    NotSupported,
-    /// Invalid parameters to PSCI call.
-    InvalidParameters,
-    /// PSCI call denied.
-    Denied,
-    /// Core already on.
-    AlreadyOn,
-    /// Core already being turned on.
-    OnPending,
-    /// Internal failure in PSCI call.
-    InternalFailure,
-    /// Trusted OS not present on target core.
-    NotPresent,
-    /// Core disabled.
-    Disabled,
-    /// Invalid address passed to PSCI call.
-    InvalidAddress,
-    /// An unexpected return value from a PSCI function.
-    Unknown(i32),
-}
-
-impl From<Error> for i32 {
-    fn from(error: Error) -> i32 {
-        match error {
-            Error::NotSupported => NOT_SUPPORTED,
-            Error::InvalidParameters => INVALID_PARAMETERS,
-            Error::Denied => DENIED,
-            Error::AlreadyOn => ALREADY_ON,
-            Error::OnPending => ON_PENDING,
-            Error::InternalFailure => INTERNAL_FAILURE,
-            Error::NotPresent => NOT_PRESENT,
-            Error::Disabled => DISABLED,
-            Error::InvalidAddress => INVALID_ADDRESS,
-            Error::Unknown(value) => value,
-        }
+/// Converts the given value (returned from an HVC32 or SMC32 call) either to `Ok(())` if it is
+/// equal to [`SUCCESS`], or else an error of the given type.
+pub fn success_or_error_32<E: From<i32>>(value: u32) -> Result<(), E> {
+    let value = value as i32;
+    if value == SUCCESS {
+        Ok(())
+    } else {
+        Err(value.into())
     }
 }
 
-impl From<Error> for i64 {
-    fn from(error: Error) -> i64 {
-        i32::from(error).into()
+/// Converts the given value (returned from an HVC64 or SMC64 call) either to `Ok(())` if it is
+/// equal to [`SUCCESS`], or else an error of the given type.
+pub fn success_or_error_64<E: From<i64>>(value: u64) -> Result<(), E> {
+    let value = value as i64;
+    if value == SUCCESS.into() {
+        Ok(())
+    } else {
+        Err(value.into())
     }
 }
 
-impl From<i32> for Error {
-    fn from(value: i32) -> Self {
-        match value {
-            NOT_SUPPORTED => Error::NotSupported,
-            INVALID_PARAMETERS => Error::InvalidParameters,
-            DENIED => Error::Denied,
-            ALREADY_ON => Error::AlreadyOn,
-            ON_PENDING => Error::OnPending,
-            INTERNAL_FAILURE => Error::InternalFailure,
-            NOT_PRESENT => Error::NotPresent,
-            DISABLED => Error::Disabled,
-            INVALID_ADDRESS => Error::InvalidAddress,
-            _ => Error::Unknown(value),
-        }
+/// Returns `Ok(value)` if the given value has its high bit unset (i.e. would be positive when
+/// treated as a signed value), or an error of the given type if the high bit is set.
+///
+/// This is intended to be used with the return value of [`hvc32`](super::hvc32) or
+/// [`smc32`](super::smc32).
+pub fn positive_or_error_32<E: From<i32>>(value: u32) -> Result<u32, E> {
+    let signed = value as i32;
+    if signed < 0 {
+        Err(signed.into())
+    } else {
+        Ok(value)
     }
 }
 
-impl From<i64> for Error {
-    fn from(value: i64) -> Self {
-        Self::from(value as i32)
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::NotSupported => write!(f, "PSCI call not supported"),
-            Self::InvalidParameters => write!(f, "Invalid parameters to PSCI call"),
-            Self::Denied => write!(f, "PSCI call denied"),
-            Self::AlreadyOn => write!(f, "Core already on"),
-            Self::OnPending => write!(f, "Core already being turned on"),
-            Self::InternalFailure => write!(f, "Internal failure in PSCI call"),
-            Self::NotPresent => write!(f, "Trusted OS not present on target core"),
-            Self::Disabled => write!(f, "Core disabled"),
-            Self::InvalidAddress => write!(f, "Invalid address passed to PSCI call"),
-            Self::Unknown(e) => write!(f, "Unknown PSCI return value {} ({0:#x})", e),
-        }
+/// Returns `Ok(value)` if the given value has its high bit unset (i.e. would be positive when
+/// treated as a signed value), or an error of the given type if the high bit is set.
+///
+/// This is intended to be used with the return value of [`hvc64`](super::hvc64) or
+/// [`smc64`](super::smc64).
+pub fn positive_or_error_64<E: From<i64>>(value: u64) -> Result<u64, E> {
+    let signed = value as i64;
+    if signed < 0 {
+        Err(signed.into())
+    } else {
+        Ok(value)
     }
 }
