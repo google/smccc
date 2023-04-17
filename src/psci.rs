@@ -13,11 +13,9 @@
 //! This crate currently only supports aarch64 and the SMC64 versions of the various calls, in the
 //! cases that both SMC32 and SMC64 versions exist.
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 mod calls;
 pub mod error;
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 pub use calls::{
     affinity_info, cpu_default_suspend, cpu_freeze, cpu_off, cpu_on, cpu_suspend, mem_protect,
     mem_protect_check_range, migrate, migrate_info_type, migrate_info_up_cpu, node_hw_state,

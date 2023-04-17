@@ -4,11 +4,9 @@
 
 //! Standard Arm architecture calls.
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 mod calls;
 pub mod error;
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 pub use calls::{
     arch_workaround_1, arch_workaround_2, arch_workaround_3, features, soc_id, version,
 };

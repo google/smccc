@@ -5,53 +5,60 @@
 //! Functions for version 1.4 of the Arm SMC Calling Convention and version 1.1 of the Arm Power
 //! State Coordination Interface (PSCI) version 1.1, and relevant constants.
 //!
-//! Note that PSCI and other SMCCC calls may be made via either HVC or SMC. You can choose which one
-//! to use by building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default
-//! `hvc` is enabled. If neither feature is enabled then the functions to make calls will not be
-//! available, but the constants and types are still provided.
+//! Note that the PSCI and SMCCC arch calls may be made via either HVC or SMC. You can choose which
+//! one to use by passing either [`Hvc`] or [`Smc`] as a type parameter to the relevant function.
 //!
 //! This crate currently only supports aarch64 and the SMC64 versions of the PSCI calls, in the
 //! cases that both SMC32 and SMC64 versions exist.
 
 #![no_std]
 
-#[cfg(all(feature = "hvc", feature = "smc"))]
-compile_error!("Only one of `hvc` or `smc` features may be enabled.");
-
 pub mod arch;
 pub mod error;
 pub mod psci;
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
-#[inline(always)]
-pub(crate) fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
-    #[cfg(feature = "hvc")]
-    {
+/// Use a Hypervisor Call (HVC).
+#[cfg(target_arch = "aarch64")]
+pub struct Hvc;
+
+/// Use a Secure Moniter Call (SMC).
+#[cfg(target_arch = "aarch64")]
+pub struct Smc;
+
+/// Functions to make an HVC or SMC call.
+pub trait Call {
+    /// Makes a call using the 32-bit calling convention.
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8];
+    /// Makes a call using the 64-bit calling convention.
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18];
+}
+
+#[cfg(target_arch = "aarch64")]
+impl Call for Hvc {
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
         hvc32(function, args)
     }
-    #[cfg(feature = "smc")]
-    {
-        smc32(function, args)
+
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+        hvc64(function, args)
     }
 }
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
-#[inline(always)]
-pub(crate) fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
-    #[cfg(feature = "hvc")]
-    {
-        hvc64(function, args)
+#[cfg(target_arch = "aarch64")]
+impl Call for Smc {
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
+        smc32(function, args)
     }
-    #[cfg(feature = "smc")]
-    {
+
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
         smc64(function, args)
     }
 }
 
 /// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
-    #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 8];
 
@@ -70,15 +77,12 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
 
         ret
     }
-
-    #[cfg(not(target_arch = "aarch64"))]
-    unimplemented!();
 }
 
 /// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
-    #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 8];
 
@@ -97,15 +101,12 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
 
         ret
     }
-
-    #[cfg(not(target_arch = "aarch64"))]
-    unimplemented!();
 }
 
 /// Makes an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
-    #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 18];
 
@@ -134,15 +135,12 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
 
         ret
     }
-
-    #[cfg(not(target_arch = "aarch64"))]
-    unimplemented!();
 }
 
 /// Makes an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
-    #[cfg(target_arch = "aarch64")]
     unsafe {
         let mut ret = [0; 18];
 
@@ -171,7 +169,4 @@ pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
 
         ret
     }
-
-    #[cfg(not(target_arch = "aarch64"))]
-    unimplemented!();
 }

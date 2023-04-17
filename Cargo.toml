@@ -9,9 +9,4 @@ repository = "https://github.com/google/smccc"
 keywords = ["arm", "aarch64", "cortex-a", "smccc", "psci"]
 categories = ["embedded", "no-std", "hardware-support"]
 
-[features]
-default = ["hvc"]
-hvc = []
-smc = []
-
 [dependencies]
