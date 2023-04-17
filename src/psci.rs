@@ -24,7 +24,7 @@ pub use calls::{
     psci_features, set_suspend_mode, stat_count, stat_residency, system_off, system_reset,
     system_reset2, system_suspend, version,
 };
-use error::Error;
+pub use error::Error;
 
 pub const PSCI_VERSION: u32 = 0x84000000;
 pub const PSCI_CPU_SUSPEND_32: u32 = 0x84000001;
