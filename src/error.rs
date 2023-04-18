@@ -11,12 +11,14 @@
 //! as:
 //!
 //! ```
+//! # #[cfg(target_arch = "aarch64")]
 //! use smccc::{
 //!     error::success_or_error_32,
 //!     psci::{error::Error, PSCI_SYSTEM_OFF},
 //!     smc32,
 //! };
 //!
+//! # #[cfg(target_arch = "aarch64")]
 //! pub fn system_off() -> Result<(), Error> {
 //!     success_or_error_32(smc32(PSCI_SYSTEM_OFF, [0; 7])[0])
 //! }
