@@ -1,11 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
 
 Renamed crate to `smccc`.
 
 ### Breaking changes
 
+- Moved PSCI code to the `psci` module, moved other modules up one level.
+- Use type parameters rather than features to specify HVC vs. SMC for PSCI and arch calls.
 - Changed `error::Error::Unknown` to contain an `i64` rather than an `i32`.
 
 ## `psci` 0.1.3
