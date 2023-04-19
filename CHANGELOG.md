@@ -4,6 +4,10 @@
 
 Renamed crate to `smccc`.
 
+### Breaking changes
+
+- Changed `error::Error::Unknown` to contain an `i64` rather than an `i32`.
+
 ## `psci` 0.1.3
 
 ### Bugfixes

@@ -39,29 +39,23 @@ pub enum Error {
     /// Invalid address passed to PSCI call.
     InvalidAddress,
     /// An unexpected return value from a PSCI function.
-    Unknown(i32),
-}
-
-impl From<Error> for i32 {
-    fn from(error: Error) -> i32 {
-        match error {
-            Error::NotSupported => NOT_SUPPORTED,
-            Error::InvalidParameters => INVALID_PARAMETERS,
-            Error::Denied => DENIED,
-            Error::AlreadyOn => ALREADY_ON,
-            Error::OnPending => ON_PENDING,
-            Error::InternalFailure => INTERNAL_FAILURE,
-            Error::NotPresent => NOT_PRESENT,
-            Error::Disabled => DISABLED,
-            Error::InvalidAddress => INVALID_ADDRESS,
-            Error::Unknown(value) => value,
-        }
-    }
+    Unknown(i64),
 }
 
 impl From<Error> for i64 {
     fn from(error: Error) -> i64 {
-        i32::from(error).into()
+        match error {
+            Error::NotSupported => NOT_SUPPORTED.into(),
+            Error::InvalidParameters => INVALID_PARAMETERS.into(),
+            Error::Denied => DENIED.into(),
+            Error::AlreadyOn => ALREADY_ON.into(),
+            Error::OnPending => ON_PENDING.into(),
+            Error::InternalFailure => INTERNAL_FAILURE.into(),
+            Error::NotPresent => NOT_PRESENT.into(),
+            Error::Disabled => DISABLED.into(),
+            Error::InvalidAddress => INVALID_ADDRESS.into(),
+            Error::Unknown(value) => value,
+        }
     }
 }
 
@@ -77,14 +71,18 @@ impl From<i32> for Error {
             NOT_PRESENT => Error::NotPresent,
             DISABLED => Error::Disabled,
             INVALID_ADDRESS => Error::InvalidAddress,
-            _ => Error::Unknown(value),
+            _ => Error::Unknown(value.into()),
         }
     }
 }
 
 impl From<i64> for Error {
     fn from(value: i64) -> Self {
-        Self::from(value as i32)
+        if let Ok(value) = i32::try_from(value) {
+            value.into()
+        } else {
+            Error::Unknown(value)
+        }
     }
 }
 
