@@ -4,7 +4,7 @@
 
 //! Error codes for standard Arm Architecture SMCCC calls.
 
-pub use crate::smccc::error::SUCCESS;
+pub use crate::error::SUCCESS;
 use core::fmt::{self, Display, Formatter};
 
 pub const NOT_SUPPORTED: i32 = -1;

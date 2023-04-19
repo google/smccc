@@ -1,2 +1,2 @@
 [toolchain]
-targets = ["aarch64-unknown-none-softfloat"]
+targets = ["aarch64-unknown-none"]

@@ -2,173 +2,171 @@
 // This project is dual-licensed under Apache 2.0 and MIT terms.
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
-//! Constants for version 1.4 of the Arm SMC Calling Convention and version 1.1 of the Arm Power
-//! State Coordination Interface (PSCI) version 1.1, and functions to call them.
+//! Functions for version 1.4 of the Arm SMC Calling Convention and version 1.1 of the Arm Power
+//! State Coordination Interface (PSCI) version 1.1, and relevant constants.
 //!
-//! Note that PSCI and other SMCCC calls may be made via either HVC or SMC. You can choose which one
-//! to use by building this crate with the corresponding feature (i.e. `hvc` or `smc`). By default
-//! `hvc` is enabled. If neither feature is enabled then the functions to make calls will not be
-//! available, but the constants and types are still provided.
+//! Note that the PSCI and SMCCC arch calls may be made via either HVC or SMC. You can choose which
+//! one to use by passing either [`Hvc`] or [`Smc`] as a type parameter to the relevant function.
 //!
-//! This crate currently only supports aarch64 and the SMC64 versions of the various calls, in the
+//! This crate currently only supports aarch64 and the SMC64 versions of the PSCI calls, in the
 //! cases that both SMC32 and SMC64 versions exist.
 
 #![no_std]
 
-#[cfg(all(feature = "hvc", feature = "smc"))]
-compile_error!("Only one of `hvc` or `smc` features may be enabled.");
-
-#[cfg(any(feature = "hvc", feature = "smc"))]
-mod calls;
+pub mod arch;
 pub mod error;
-pub mod smccc;
+pub mod psci;
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
-pub use calls::{
-    affinity_info, cpu_default_suspend, cpu_freeze, cpu_off, cpu_on, cpu_suspend, mem_protect,
-    mem_protect_check_range, migrate, migrate_info_type, migrate_info_up_cpu, node_hw_state,
-    psci_features, set_suspend_mode, stat_count, stat_residency, system_off, system_reset,
-    system_reset2, system_suspend, version,
-};
-use error::Error;
+/// Use a Hypervisor Call (HVC).
+#[cfg(target_arch = "aarch64")]
+pub struct Hvc;
 
-pub const PSCI_VERSION: u32 = 0x84000000;
-pub const PSCI_CPU_SUSPEND_32: u32 = 0x84000001;
-pub const PSCI_CPU_SUSPEND_64: u32 = 0xC4000001;
-pub const PSCI_CPU_OFF: u32 = 0x84000002;
-pub const PSCI_CPU_ON_32: u32 = 0x84000003;
-pub const PSCI_CPU_ON_64: u32 = 0xC4000003;
-pub const PSCI_AFFINITY_INFO_32: u32 = 0x84000004;
-pub const PSCI_AFFINITY_INFO_64: u32 = 0xC4000004;
-pub const PSCI_MIGRATE_32: u32 = 0x84000005;
-pub const PSCI_MIGRATE_64: u32 = 0xC4000005;
-pub const PSCI_MIGRATE_INFO_TYPE: u32 = 0x84000006;
-pub const PSCI_MIGRATE_INFO_UP_CPU_32: u32 = 0x84000007;
-pub const PSCI_MIGRATE_INFO_UP_CPU_64: u32 = 0xC4000007;
-pub const PSCI_SYSTEM_OFF: u32 = 0x84000008;
-pub const PSCI_SYSTEM_RESET: u32 = 0x84000009;
-pub const PSCI_SYSTEM_RESET2_32: u32 = 0x84000012;
-pub const PSCI_SYSTEM_RESET2_64: u32 = 0xC4000012;
-pub const PSCI_MEM_PROTECT: u32 = 0x84000013;
-pub const PSCI_MEM_PROTECT_CHECK_RANGE_32: u32 = 0x84000014;
-pub const PSCI_MEM_PROTECT_CHECK_RANGE_64: u32 = 0xC4000014;
-pub const PSCI_FEATURES: u32 = 0x8400000A;
-pub const PSCI_CPU_FREEZE: u32 = 0x8400000B;
-pub const PSCI_CPU_DEFAULT_SUSPEND_32: u32 = 0x8400000C;
-pub const PSCI_CPU_DEFAULT_SUSPEND_64: u32 = 0xC400000C;
-pub const PSCI_NODE_HW_STATE_32: u32 = 0x8400000D;
-pub const PSCI_NODE_HW_STATE_64: u32 = 0xC400000D;
-pub const PSCI_SYSTEM_SUSPEND_32: u32 = 0x8400000E;
-pub const PSCI_SYSTEM_SUSPEND_64: u32 = 0xC400000E;
-pub const PSCI_SET_SUSPEND_MODE: u32 = 0x8400000F;
-pub const PSCI_STAT_RESIDENCY_32: u32 = 0x84000010;
-pub const PSCI_STAT_RESIDENCY_64: u32 = 0xC4000010;
-pub const PSCI_STAT_COUNT_32: u32 = 0x84000011;
-pub const PSCI_STAT_COUNT_64: u32 = 0xC4000011;
+/// Use a Secure Moniter Call (SMC).
+#[cfg(target_arch = "aarch64")]
+pub struct Smc;
 
-/// Selects which affinity level fields are valid in the `target_affinity` parameter to
-/// `AFFINITY_INFO`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum LowestAffinityLevel {
-    /// All afinity level fields are valid.
-    All = 0,
-    /// The `Aff0` field is ignored.
-    Aff0Ignored = 1,
-    /// The `Aff0` and `Aff1` fields are ignored.
-    Aff0Aff1Ignored = 2,
-    /// The `Aff0`, `Aff1` and `Aff2` fields are ignored.
-    Aff0Aff1Aff2Ignored = 3,
+/// Functions to make an HVC or SMC call.
+pub trait Call {
+    /// Makes a call using the 32-bit calling convention.
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8];
+    /// Makes a call using the 64-bit calling convention.
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18];
 }
 
-impl From<LowestAffinityLevel> for u64 {
-    fn from(lowest_affinity_level: LowestAffinityLevel) -> u64 {
-        (lowest_affinity_level as u32).into()
+#[cfg(target_arch = "aarch64")]
+impl Call for Hvc {
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
+        hvc32(function, args)
+    }
+
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+        hvc64(function, args)
     }
 }
 
-/// Affinity state values returned by `AFFINITY_INFO`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum AffinityState {
-    /// At least one core in the affinity instance is on.
-    On = 0,
-    /// All cores in the affinity instance are off.
-    Off = 1,
-    /// The affinity instance is transitioning to the on state.
-    OnPending = 2,
-}
+#[cfg(target_arch = "aarch64")]
+impl Call for Smc {
+    fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
+        smc32(function, args)
+    }
 
-impl TryFrom<i32> for AffinityState {
-    type Error = Error;
-
-    fn try_from(value: i32) -> Result<Self, Error> {
-        match value {
-            0 => Ok(Self::On),
-            1 => Ok(Self::Off),
-            2 => Ok(Self::OnPending),
-            _ => Err(value.into()),
-        }
+    fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+        smc64(function, args)
     }
 }
 
-/// The level of multicore support in the Trusted OS, as returned by `MIGRATE_INFO_TYPE`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum MigrateType {
-    /// The Trusted OS will only run on one core, and supports the `MIGRATE` function.
-    MigrateCapable = 0,
-    /// The Trusted OS does not support the `MIGRATE` function.
-    NotMigrateCapable = 1,
-    /// Either there is no Trusted OS, or it doesn't require migration.
-    MigrationNotRequired = 2,
-}
+/// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+    unsafe {
+        let mut ret = [0; 8];
 
-impl TryFrom<i32> for MigrateType {
-    type Error = Error;
+        core::arch::asm!(
+            "hvc #0",
+            inout("w0") function => ret[0],
+            inout("w1") args[0] => ret[1],
+            inout("w2") args[1] => ret[2],
+            inout("w3") args[2] => ret[3],
+            inout("w4") args[3] => ret[4],
+            inout("w5") args[4] => ret[5],
+            inout("w6") args[5] => ret[6],
+            inout("w7") args[6] => ret[7],
+            options(nomem, nostack)
+        );
 
-    fn try_from(value: i32) -> Result<Self, Error> {
-        match value {
-            0 => Ok(Self::MigrateCapable),
-            1 => Ok(Self::NotMigrateCapable),
-            2 => Ok(Self::MigrationNotRequired),
-            _ => Err(value.into()),
-        }
+        ret
     }
 }
 
-/// The power state of a node in the power domain topology, as returned by `NODE_HW_STATE`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum PowerState {
-    /// The node is in the run state.
-    HwOn = 0,
-    /// The node is fully powered down.
-    HwOff = 1,
-    /// The node is in a standby or retention power state.
-    HwStandby = 2,
-}
+/// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+    unsafe {
+        let mut ret = [0; 8];
 
-impl TryFrom<i32> for PowerState {
-    type Error = Error;
+        core::arch::asm!(
+            "smc #0",
+            inout("w0") function => ret[0],
+            inout("w1") args[0] => ret[1],
+            inout("w2") args[1] => ret[2],
+            inout("w3") args[2] => ret[3],
+            inout("w4") args[3] => ret[4],
+            inout("w5") args[4] => ret[5],
+            inout("w6") args[5] => ret[6],
+            inout("w7") args[6] => ret[7],
+            options(nomem, nostack)
+        );
 
-    fn try_from(value: i32) -> Result<Self, Error> {
-        match value {
-            0 => Ok(Self::HwOn),
-            1 => Ok(Self::HwOff),
-            2 => Ok(Self::HwStandby),
-            _ => Err(value.into()),
-        }
+        ret
     }
 }
 
-/// The mode to be used by `CPU_SUSPEND`, as set by `PSCI_SET_SUSPEND_MODE`.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum SuspendMode {
-    /// Platform-coordinated mode.
-    PlatformCoordinated = 0,
-    /// OS-initiated mode.
-    OsInitiated = 1,
+/// Makes an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
+    unsafe {
+        let mut ret = [0; 18];
+
+        core::arch::asm!(
+            "hvc #0",
+            inout("x0") function as u64 => ret[0],
+            inout("x1") args[0] => ret[1],
+            inout("x2") args[1] => ret[2],
+            inout("x3") args[2] => ret[3],
+            inout("x4") args[3] => ret[4],
+            inout("x5") args[4] => ret[5],
+            inout("x6") args[5] => ret[6],
+            inout("x7") args[6] => ret[7],
+            inout("x8") args[7] => ret[8],
+            inout("x9") args[8] => ret[9],
+            inout("x10") args[9] => ret[10],
+            inout("x11") args[10] => ret[11],
+            inout("x12") args[11] => ret[12],
+            inout("x13") args[12] => ret[13],
+            inout("x14") args[13] => ret[14],
+            inout("x15") args[14] => ret[15],
+            inout("x16") args[15] => ret[16],
+            inout("x17") args[16] => ret[17],
+            options(nomem, nostack)
+        );
+
+        ret
+    }
 }
 
-impl From<SuspendMode> for u32 {
-    fn from(suspend_mode: SuspendMode) -> u32 {
-        suspend_mode as u32
+/// Makes an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
+    unsafe {
+        let mut ret = [0; 18];
+
+        core::arch::asm!(
+            "smc #0",
+            inout("x0") function as u64 => ret[0],
+            inout("x1") args[0] => ret[1],
+            inout("x2") args[1] => ret[2],
+            inout("x3") args[2] => ret[3],
+            inout("x4") args[3] => ret[4],
+            inout("x5") args[4] => ret[5],
+            inout("x6") args[5] => ret[6],
+            inout("x7") args[6] => ret[7],
+            inout("x8") args[7] => ret[8],
+            inout("x9") args[8] => ret[9],
+            inout("x10") args[9] => ret[10],
+            inout("x11") args[10] => ret[11],
+            inout("x12") args[11] => ret[12],
+            inout("x13") args[12] => ret[13],
+            inout("x14") args[13] => ret[14],
+            inout("x15") args[14] => ret[15],
+            inout("x16") args[15] => ret[16],
+            inout("x17") args[16] => ret[17],
+            options(nomem, nostack)
+        );
+
+        ret
     }
 }

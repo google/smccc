@@ -4,16 +4,14 @@
 
 //! Standard Arm architecture calls.
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 mod calls;
 pub mod error;
 
-#[cfg(any(feature = "hvc", feature = "smc"))]
 pub use calls::{
     arch_workaround_1, arch_workaround_2, arch_workaround_3, features, soc_id, version,
 };
 use core::fmt::{self, Debug, Display, Formatter};
-use error::Error;
+pub use error::Error;
 
 pub const SMCCC_VERSION: u32 = 0x8000_0000;
 pub const SMCCC_ARCH_FEATURES: u32 = 0x8000_0001;
