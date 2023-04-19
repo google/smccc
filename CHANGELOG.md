@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+Renamed crate to `smccc`; please use that instead.
+
 ## 0.1.3
 
 ### Bugfixes
