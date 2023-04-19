@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bugfixes
+
+- Fixed docs.rs to build for aarch64.
+
 ## 0.1.0
 
 Renamed crate to `smccc`.

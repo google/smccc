@@ -10,3 +10,6 @@ keywords = ["arm", "aarch64", "cortex-a", "smccc", "psci"]
 categories = ["embedded", "no-std", "hardware-support"]
 
 [dependencies]
+
+[package.metadata.docs.rs]
+default-target = "aarch64-unknown-none"
