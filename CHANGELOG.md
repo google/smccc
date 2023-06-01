@@ -9,6 +9,8 @@
 ### New features
 
 - Error types now implement `core::error::Error`.
+- Added 32-bit versions of 64-bit PSCI calls.
+- Added support for aarch32.
 
 ## 0.1.1
 

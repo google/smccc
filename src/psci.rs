@@ -17,10 +17,12 @@ mod calls;
 pub mod error;
 
 pub use calls::{
-    affinity_info, cpu_default_suspend, cpu_freeze, cpu_off, cpu_on, cpu_suspend, mem_protect,
-    mem_protect_check_range, migrate, migrate_info_type, migrate_info_up_cpu, node_hw_state,
-    psci_features, set_suspend_mode, stat_count, stat_residency, system_off, system_reset,
-    system_reset2, system_suspend, version,
+    affinity_info, affinity_info_32, cpu_default_suspend, cpu_default_suspend_32, cpu_freeze,
+    cpu_off, cpu_on, cpu_on_32, cpu_suspend, cpu_suspend_32, mem_protect, mem_protect_check_range,
+    mem_protect_check_range_32, migrate, migrate_32, migrate_info_type, migrate_info_up_cpu,
+    migrate_info_up_cpu_32, node_hw_state, node_hw_state_32, psci_features, set_suspend_mode,
+    stat_count, stat_count_32, stat_residency, stat_residency_32, system_off, system_reset,
+    system_reset2, system_reset2_32, system_suspend, system_suspend_32, version,
 };
 use core::fmt::{self, Debug, Display, Formatter};
 pub use error::Error;
