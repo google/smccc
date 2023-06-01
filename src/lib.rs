@@ -20,11 +20,11 @@ pub mod error;
 pub mod psci;
 
 /// Use a Hypervisor Call (HVC).
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 pub struct Hvc;
 
 /// Use a Secure Moniter Call (SMC).
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 pub struct Smc;
 
 /// Functions to make an HVC or SMC call.
@@ -35,30 +35,36 @@ pub trait Call {
     fn call64(function: u32, args: [u64; 17]) -> [u64; 18];
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 impl Call for Hvc {
     fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
         hvc32(function, args)
     }
 
     fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+        #[cfg(not(target_arch = "aarch64"))]
+        panic!("HVC64 not supported on 32-bit architecture");
+        #[cfg(target_arch = "aarch64")]
         hvc64(function, args)
     }
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 impl Call for Smc {
     fn call32(function: u32, args: [u32; 7]) -> [u32; 8] {
         smc32(function, args)
     }
 
     fn call64(function: u32, args: [u64; 17]) -> [u64; 18] {
+        #[cfg(not(target_arch = "aarch64"))]
+        panic!("SMC64 not supported on 32-bit architecture");
+        #[cfg(target_arch = "aarch64")]
         smc64(function, args)
     }
 }
 
 /// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 #[inline(always)]
 pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
@@ -66,6 +72,7 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     unsafe {
         let mut ret = [0; 8];
 
+        #[cfg(target_arch = "aarch64")]
         core::arch::asm!(
             "hvc #0",
             inout("w0") function => ret[0],
@@ -78,13 +85,33 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w7") args[6] => ret[7],
             options(nomem, nostack)
         );
+        // LLVM uses r6 internally and so we aren't allowed to use it as an input or output here. To
+        // work around this we save and restore r6 and copy from/to a temporary register instead.
+        #[cfg(target_arch = "arm")]
+        core::arch::asm!(
+            "mov {tmp}, r6",
+            "mov r6, {r6_value}",
+            "hvc #0",
+            "mov {r6_value}, r6",
+            "mov r6, {tmp}",
+            r6_value = inout(reg) args[5] => ret[6],
+            tmp = out(reg) _,
+            inout("r0") function => ret[0],
+            inout("r1") args[0] => ret[1],
+            inout("r2") args[1] => ret[2],
+            inout("r3") args[2] => ret[3],
+            inout("r4") args[3] => ret[4],
+            inout("r5") args[4] => ret[5],
+            inout("r7") args[6] => ret[7],
+            options(nomem, nostack)
+        );
 
         ret
     }
 }
 
 /// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 #[inline(always)]
 pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
@@ -92,6 +119,7 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     unsafe {
         let mut ret = [0; 8];
 
+        #[cfg(target_arch = "aarch64")]
         core::arch::asm!(
             "smc #0",
             inout("w0") function => ret[0],
@@ -102,6 +130,24 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w5") args[4] => ret[5],
             inout("w6") args[5] => ret[6],
             inout("w7") args[6] => ret[7],
+            options(nomem, nostack)
+        );
+        #[cfg(target_arch = "arm")]
+        core::arch::asm!(
+            "mov {tmp}, r6",
+            "mov r6, {r6_value}",
+            "smc #0",
+            "mov {r6_value}, r6",
+            "mov r6, {tmp}",
+            r6_value = inout(reg) args[5] => ret[6],
+            tmp = out(reg) _,
+            inout("r0") function => ret[0],
+            inout("r1") args[0] => ret[1],
+            inout("r2") args[1] => ret[2],
+            inout("r3") args[2] => ret[3],
+            inout("r4") args[3] => ret[4],
+            inout("r5") args[4] => ret[5],
+            inout("r7") args[6] => ret[7],
             options(nomem, nostack)
         );
 
