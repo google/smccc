@@ -5,7 +5,8 @@
 
 This crate provides support for the Arm SMC Calling Convention version 1.4, including standard Arm
 Architecture Calls constants, and version 1.1 of the Arm Power State Coordination Interface (PSCI).
-It includes constants, functions to make the calls (on aarch64 targets), and error types.
+It includes constants, functions to make the calls (on aarch32 and aarch64 targets), and error
+types.
 
 Note that the PSCI and SMCCC arch calls may be made via either HVC or SMC. You can choose which one
 to use by passing either `Hvc` or `Smc` as a type parameter to the relevant function.
