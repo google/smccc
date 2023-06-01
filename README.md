@@ -10,9 +10,6 @@ It includes constants, functions to make the calls (on aarch64 targets), and err
 Note that the PSCI and SMCCC arch calls may be made via either HVC or SMC. You can choose which one
 to use by passing either `Hvc` or `Smc` as a type parameter to the relevant function.
 
-This crate currently only supports aarch64 and the SMC64 versions of the PSCI calls, in the cases
-that both SMC32 and SMC64 versions exist.
-
 This is not an officially supported Google product.
 
 ## License

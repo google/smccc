@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### New features
+
+- Added 32-bit versions of 64-bit PSCI calls.
+
 ## 0.1.1
 
 ### Bugfixes
