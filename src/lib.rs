@@ -63,7 +63,7 @@ impl Call for Smc {
     }
 }
 
-/// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.3.
+/// Makes an HVC32 call to the hypervisor, following the SMC Calling Convention version 1.4.
 #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 #[inline(always)]
 pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
@@ -110,7 +110,7 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     }
 }
 
-/// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.3.
+/// Makes an SMC32 call to the firmware, following the SMC Calling Convention version 1.4.
 #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
 #[inline(always)]
 pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
@@ -155,7 +155,7 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
     }
 }
 
-/// Makes an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.3.
+/// Makes an HVC64 call to the hypervisor, following the SMC Calling Convention version 1.4.
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
@@ -191,7 +191,7 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
     }
 }
 
-/// Makes an SMC64 call to the firmware, following the SMC Calling Convention version 1.3.
+/// Makes an SMC64 call to the firmware, following the SMC Calling Convention version 1.4.
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
