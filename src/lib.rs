@@ -12,6 +12,8 @@
 //! cases that both SMC32 and SMC64 versions exist.
 
 #![no_std]
+#![deny(unsafe_op_in_unsafe_fn)]
+#![deny(clippy::undocumented_unsafe_blocks)]
 
 pub mod arch;
 pub mod error;
@@ -59,6 +61,8 @@ impl Call for Smc {
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+    // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
+    // are saved and restored as expected.
     unsafe {
         let mut ret = [0; 8];
 
@@ -83,6 +87,8 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
+    // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
+    // are saved and restored as expected.
     unsafe {
         let mut ret = [0; 8];
 
@@ -107,6 +113,8 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
+    // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
+    // are saved and restored as expected.
     unsafe {
         let mut ret = [0; 18];
 
@@ -141,6 +149,8 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
+    // SAFETY: This shouldn't affect our memory, and we follow the calling convention so registers
+    // are saved and restored as expected.
     unsafe {
         let mut ret = [0; 18];
 
