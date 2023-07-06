@@ -21,6 +21,11 @@ jobs:
         uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run clippy on aarch64
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --target=aarch64-unknown-none
 
   format:
     runs-on: ubuntu-latest
