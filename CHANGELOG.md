@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### New features
+
+- Error types now implement `core::error::Error`.
+
 ## 0.1.1
 
 ### Bugfixes
