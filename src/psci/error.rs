@@ -5,7 +5,6 @@
 //! PSCI error codes.
 
 pub use crate::error::SUCCESS;
-use core::fmt::{self, Display, Formatter};
 
 pub const NOT_SUPPORTED: i32 = -1;
 pub const INVALID_PARAMETERS: i32 = -2;
@@ -18,27 +17,37 @@ pub const DISABLED: i32 = -8;
 pub const INVALID_ADDRESS: i32 = -9;
 
 /// Standard PSCI errors.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, thiserror::Error)]
 pub enum Error {
     /// PSCI call not supported.
+    #[error("PSCI call not supported")]
     NotSupported,
     /// Invalid parameters to PSCI call.
+    #[error("Invalid parameters to PSCI call")]
     InvalidParameters,
     /// PSCI call denied.
+    #[error("PSCI call denied")]
     Denied,
     /// Core already on.
+    #[error("Core already on")]
     AlreadyOn,
     /// Core already being turned on.
+    #[error("Core already being turned on")]
     OnPending,
     /// Internal failure in PSCI call.
+    #[error("Internal failure in PSCI call")]
     InternalFailure,
     /// Trusted OS not present on target core.
+    #[error("Trusted OS not present on target core")]
     NotPresent,
     /// Core disabled.
+    #[error("Core disabled")]
     Disabled,
     /// Invalid address passed to PSCI call.
+    #[error("Invalid address passed to PSCI call")]
     InvalidAddress,
     /// An unexpected return value from a PSCI function.
+    #[error("Unknown PSCI return value {0} ({0:#x})")]
     Unknown(i64),
 }
 
@@ -82,23 +91,6 @@ impl From<i64> for Error {
             value.into()
         } else {
             Error::Unknown(value)
-        }
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::NotSupported => write!(f, "PSCI call not supported"),
-            Self::InvalidParameters => write!(f, "Invalid parameters to PSCI call"),
-            Self::Denied => write!(f, "PSCI call denied"),
-            Self::AlreadyOn => write!(f, "Core already on"),
-            Self::OnPending => write!(f, "Core already being turned on"),
-            Self::InternalFailure => write!(f, "Internal failure in PSCI call"),
-            Self::NotPresent => write!(f, "Trusted OS not present on target core"),
-            Self::Disabled => write!(f, "Core disabled"),
-            Self::InvalidAddress => write!(f, "Invalid address passed to PSCI call"),
-            Self::Unknown(e) => write!(f, "Unknown PSCI return value {} ({0:#x})", e),
         }
     }
 }
