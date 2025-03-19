@@ -6,7 +6,7 @@
 
 use super::{
     error::Error, AffinityState, LowestAffinityLevel, MigrateType, PowerState, SuspendMode,
-    PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
+    Version, PSCI_AFFINITY_INFO_64, PSCI_CPU_DEFAULT_SUSPEND_64, PSCI_CPU_FREEZE, PSCI_CPU_OFF,
     PSCI_CPU_ON_64, PSCI_CPU_SUSPEND_64, PSCI_FEATURES, PSCI_MEM_PROTECT,
     PSCI_MEM_PROTECT_CHECK_RANGE_64, PSCI_MIGRATE_64, PSCI_MIGRATE_INFO_TYPE,
     PSCI_MIGRATE_INFO_UP_CPU_64, PSCI_NODE_HW_STATE_64, PSCI_SET_SUSPEND_MODE, PSCI_STAT_COUNT_64,
@@ -19,8 +19,8 @@ use crate::{
 };
 
 /// Returns the version of PSCI implemented.
-pub fn version<C: Call>() -> u32 {
-    C::call32(PSCI_VERSION, [0; 7])[0]
+pub fn version<C: Call>() -> Result<Version, Error> {
+    (C::call32(PSCI_VERSION, [0; 7])[0] as i32).try_into()
 }
 
 /// Suspends execution of a core or topology node.

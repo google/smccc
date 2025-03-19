@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Breaking changes
+
+- Added `psci::Version` type, which is used for the return value of `psci::version`.
+
 ### New features
 
 - Error types now implement `core::error::Error`.
