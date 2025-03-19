@@ -22,6 +22,7 @@ pub use calls::{
     psci_features, set_suspend_mode, stat_count, stat_residency, system_off, system_reset,
     system_reset2, system_suspend, version,
 };
+use core::fmt::{self, Debug, Display, Formatter};
 pub use error::Error;
 
 pub const PSCI_VERSION: u32 = 0x84000000;
@@ -57,6 +58,46 @@ pub const PSCI_STAT_RESIDENCY_32: u32 = 0x84000010;
 pub const PSCI_STAT_RESIDENCY_64: u32 = 0xC4000010;
 pub const PSCI_STAT_COUNT_32: u32 = 0x84000011;
 pub const PSCI_STAT_COUNT_64: u32 = 0xC4000011;
+
+/// A version of PSCI.
+#[derive(Copy, Clone, Eq, Ord, PartialEq, PartialOrd)]
+pub struct Version {
+    pub major: u16,
+    pub minor: u16,
+}
+
+impl Display for Version {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}.{}", self.major, self.minor)
+    }
+}
+
+impl Debug for Version {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        Display::fmt(self, f)
+    }
+}
+
+impl TryFrom<i32> for Version {
+    type Error = Error;
+
+    fn try_from(value: i32) -> Result<Self, Error> {
+        if value < 0 {
+            Err(value.into())
+        } else {
+            Ok(Self {
+                major: (value >> 16) as u16,
+                minor: value as u16,
+            })
+        }
+    }
+}
+
+impl From<Version> for u32 {
+    fn from(version: Version) -> Self {
+        u32::from(version.major) << 16 | u32::from(version.minor)
+    }
+}
 
 /// Selects which affinity level fields are valid in the `target_affinity` parameter to
 /// `AFFINITY_INFO`.
