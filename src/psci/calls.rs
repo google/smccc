@@ -401,7 +401,8 @@ pub fn set_suspend_mode<C: Call>(mode: SuspendMode) -> Result<(), Error> {
     success_or_error_32(C::call32(PSCI_SET_SUSPEND_MODE, [mode.into(), 0, 0, 0, 0, 0, 0])[0])
 }
 
-/// Returns the amount of time the platform has spend in the given power state since cold boot.
+/// Returns the amount of time in microseconds that the platform has spent in the given power state
+/// since cold boot.
 pub fn stat_residency<C: Call>(target_cpu: u64, power_state: u32) -> u64 {
     C::call64(
         PSCI_STAT_RESIDENCY_64,
@@ -427,7 +428,8 @@ pub fn stat_residency<C: Call>(target_cpu: u64, power_state: u32) -> u64 {
     )[0]
 }
 
-/// Returns the amount of time the platform has spend in the given power state since cold boot.
+/// Returns the amount of time in microseconds that the platform has spent in the given power state
+/// since cold boot.
 pub fn stat_residency_32<C: Call>(target_cpu: u32, power_state: u32) -> u32 {
     C::call32(
         PSCI_STAT_RESIDENCY_32,
