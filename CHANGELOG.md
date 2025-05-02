@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Bugfixes
+
+- Removed `nomem` options from SMC and HVC call `asm!` blocks. The implementation of an HVC or SMC
+  call may access the program's memory, so this isn't necessarily correct.
+
 ## 0.2.0
 
 ### Breaking changes
