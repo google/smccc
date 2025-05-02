@@ -3,12 +3,12 @@
 // See LICENSE-APACHE and LICENSE-MIT for details.
 
 use super::{
-    error::Error, SocIdType, Version, SMCCC_ARCH_FEATURES, SMCCC_ARCH_SOC_ID,
-    SMCCC_ARCH_WORKAROUND_1, SMCCC_ARCH_WORKAROUND_2, SMCCC_ARCH_WORKAROUND_3, SMCCC_VERSION,
+    SMCCC_ARCH_FEATURES, SMCCC_ARCH_SOC_ID, SMCCC_ARCH_WORKAROUND_1, SMCCC_ARCH_WORKAROUND_2,
+    SMCCC_ARCH_WORKAROUND_3, SMCCC_VERSION, SocIdType, Version, error::Error,
 };
 use crate::{
-    error::{positive_or_error_32, success_or_error_32},
     Call,
+    error::{positive_or_error_32, success_or_error_32},
 };
 
 /// Returns the implemented version of the SMC Calling Convention.
