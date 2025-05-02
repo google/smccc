@@ -83,7 +83,7 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w5") args[4] => ret[5],
             inout("w6") args[5] => ret[6],
             inout("w7") args[6] => ret[7],
-            options(nomem, nostack)
+            options(nostack)
         );
         // LLVM uses r6 internally and so we aren't allowed to use it as an input or output here. To
         // work around this we save and restore r6 and copy from/to a temporary register instead.
@@ -103,7 +103,7 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("r4") args[3] => ret[4],
             inout("r5") args[4] => ret[5],
             inout("r7") args[6] => ret[7],
-            options(nomem, nostack)
+            options(nostack)
         );
 
         ret
@@ -130,7 +130,7 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w5") args[4] => ret[5],
             inout("w6") args[5] => ret[6],
             inout("w7") args[6] => ret[7],
-            options(nomem, nostack)
+            options(nostack)
         );
         #[cfg(target_arch = "arm")]
         core::arch::asm!(
@@ -148,7 +148,7 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("r4") args[3] => ret[4],
             inout("r5") args[4] => ret[5],
             inout("r7") args[6] => ret[7],
-            options(nomem, nostack)
+            options(nostack)
         );
 
         ret
@@ -184,7 +184,7 @@ pub fn hvc64(function: u32, args: [u64; 17]) -> [u64; 18] {
             inout("x15") args[14] => ret[15],
             inout("x16") args[15] => ret[16],
             inout("x17") args[16] => ret[17],
-            options(nomem, nostack)
+            options(nostack)
         );
 
         ret
@@ -220,7 +220,7 @@ pub fn smc64(function: u32, args: [u64; 17]) -> [u64; 18] {
             inout("x15") args[14] => ret[15],
             inout("x16") args[15] => ret[16],
             inout("x17") args[16] => ret[17],
-            options(nomem, nostack)
+            options(nostack)
         );
 
         ret
