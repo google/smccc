@@ -1,6 +1,6 @@
 [package]
 name = "smccc"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Functions and constants for the Arm SMC Calling Convention (SMCCC) 1.4 and Arm Power State Coordination Interface (PSCI) 1.1 on aarch32 and aarch64."
