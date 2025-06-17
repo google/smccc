@@ -85,24 +85,30 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             inout("w7") args[6] => ret[7],
             options(nostack)
         );
-        // LLVM uses r6 internally and so we aren't allowed to use it as an input or output here. To
-        // work around this we save and restore r6 and copy from/to a temporary register instead.
+        // LLVM uses r6 internally and r7 as the frame pointer and so we aren't allowed to use them
+        // as inputs or outputs here. To work around this we save and restore r6 and r7 and copy
+        // from/to a temporary register instead.
         #[cfg(target_arch = "arm")]
         core::arch::asm!(
-            "mov {tmp}, r6",
+            "mov {tmp6}, r6",
+            "mov {tmp7}, r7",
             "mov r6, {r6_value}",
+            "mov r7, {r7_value}",
             "hvc #0",
             "mov {r6_value}, r6",
-            "mov r6, {tmp}",
+            "mov {r7_value}, r7",
+            "mov r6, {tmp6}",
+            "mov r7, {tmp7}",
             r6_value = inout(reg) args[5] => ret[6],
-            tmp = out(reg) _,
+            tmp6 = out(reg) _,
+            r7_value = inout(reg) args[6] => ret[7],
+            tmp7 = out(reg) _,
             inout("r0") function => ret[0],
             inout("r1") args[0] => ret[1],
             inout("r2") args[1] => ret[2],
             inout("r3") args[2] => ret[3],
             inout("r4") args[3] => ret[4],
             inout("r5") args[4] => ret[5],
-            inout("r7") args[6] => ret[7],
             options(nostack)
         );
 
@@ -134,20 +140,25 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
         );
         #[cfg(target_arch = "arm")]
         core::arch::asm!(
-            "mov {tmp}, r6",
+            "mov {tmp6}, r6",
+            "mov {tmp7}, r7",
             "mov r6, {r6_value}",
+            "mov r7, {r7_value}",
             "smc #0",
             "mov {r6_value}, r6",
-            "mov r6, {tmp}",
+            "mov {r7_value}, r7",
+            "mov r6, {tmp6}",
+            "mov r7, {tmp7}",
             r6_value = inout(reg) args[5] => ret[6],
-            tmp = out(reg) _,
+            tmp6 = out(reg) _,
+            r7_value = inout(reg) args[6] => ret[7],
+            tmp7 = out(reg) _,
             inout("r0") function => ret[0],
             inout("r1") args[0] => ret[1],
             inout("r2") args[1] => ret[2],
             inout("r3") args[2] => ret[3],
             inout("r4") args[3] => ret[4],
             inout("r5") args[4] => ret[5],
-            inout("r7") args[6] => ret[7],
             options(nostack)
         );
 

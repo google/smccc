@@ -15,8 +15,22 @@ jobs:
       checks: write
     steps:
       - uses: actions/checkout@v4
+      - name: Install aarch64 toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: aarch64-unknown-none
+      - name: Install aarch32 toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7a-none-eabi
       - name: Build
         run: cargo build
+      - name: Build for aarch64
+        run: cargo build --target=aarch64-unknown-none
+      - name: Build for aarch32
+        run: RUSTFLAGS="-Ctarget-feature=+trustzone,+virtualization" cargo build --target armv7a-none-eabi
       - name: Run tests
         run: cargo test
       - name: Run clippy
