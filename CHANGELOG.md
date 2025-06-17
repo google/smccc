@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Bugfixes
+
+- Workaround build issue on some aarch32 targets where r7 is reserved as the frame pointer.
+
 ## 0.2.1
 
 ### Bugfixes
