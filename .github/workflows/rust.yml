@@ -14,7 +14,7 @@ jobs:
     permissions:
       checks: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install aarch64 toolchain
         run: rustup target add aarch64-unknown-none
       - name: Install aarch32 toolchain
@@ -40,6 +40,6 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Format Rust code
         run: cargo fmt --all -- --check
