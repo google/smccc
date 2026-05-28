@@ -94,7 +94,7 @@ pub fn hvc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             "mov {tmp7}, r7",
             "mov r6, {r6_value}",
             "mov r7, {r7_value}",
-            "hvc #0",
+            ".inst 0xe1400070", // hvc #0, without requiring -C target-feature=+virtualization
             "mov {r6_value}, r6",
             "mov {r7_value}, r7",
             "mov r6, {tmp6}",
@@ -144,7 +144,7 @@ pub fn smc32(function: u32, args: [u32; 7]) -> [u32; 8] {
             "mov {tmp7}, r7",
             "mov r6, {r6_value}",
             "mov r7, {r7_value}",
-            "smc #0",
+            ".inst 0xe1600070", // smc #0, without requiring -C target-feature=+trustzone
             "mov {r6_value}, r6",
             "mov {r7_value}, r7",
             "mov r6, {tmp6}",
