@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3
+
+### Improvements
+
+- Builds on aarch32 without `target-feature=+virtualization,+trustzone`, by using raw opcodes for
+  HVC and SMC instructions.
+
 ## 0.2.2
 
 ### Bugfixes
